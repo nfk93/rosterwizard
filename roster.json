@@ -1,5 +1,5 @@
-{
-        "0": {
+[
+    {
         "Toriees": {
                 "class": "DK",
                 "role": "TANK",
@@ -10,8 +10,8 @@
                 "role": "TANK",
                 "main": false
         }
-        },
-        "1": {
+    },
+    {
         "Bensmonk": {
                 "class": "MO",
                 "role": "TANK",
@@ -27,8 +27,8 @@
                 "role": "RANGED",
                 "main": false
         }
-        },
-        "2": {
+    },
+    {
         "Câlyssa": {
                 "class": "SH",
                 "role": "HEALER",
@@ -44,29 +44,29 @@
                 "role": "HEALER",
                 "main": false
         }
-        },
-        "3": {
+    },
+    {
         "Foghammar": {
                 "class": "SH",
                 "role": "HEALER",
                 "main": true
         }
-        },
-        "4": {
+    },
+    {
         "Twicepriest": {
                 "class": "PR",
                 "role": "HEALER",
                 "main": true
         }
-        },
-        "5": {
+    },
+    {
         "Druuls": {
                 "class": "PA",
                 "role": "HEALER",
                 "main": true
         }
-        },
-        "6": {
+    },
+    {
         "Totanká": {
                 "class": "DR",
                 "role": "HEALER",
@@ -77,8 +77,8 @@
                 "role": "HEALER",
                 "main": false
         }
-        },
-        "7": {
+    },
+    {
         "Zlayèr": {
                 "class": "WL",
                 "role": "RANGED",
@@ -89,29 +89,29 @@
                 "role": "RANGED",
                 "main": false
         }
-        },
-        "8": {
+    },
+    {
         "Gulsvien": {
                 "class": "WL",
                 "role": "RANGED",
                 "main": true
         }
-        },
-        "9": {
+    },
+    {
         "Dhaiva": {
                 "class": "WL",
                 "role": "RANGED",
                 "main": true
         }
-        },
-        "10": {
+    },
+    {
         "Sneepsin": {
                 "class": "MA",
                 "role": "RANGED",
                 "main": true
         }
-        },
-        "11": {
+    },
+    {
         "Räven": {
                 "class": "MA",
                 "role": "RANGED",
@@ -122,15 +122,15 @@
                 "role": "RANGED",
                 "main": false
         }
-        },
-        "12": {
+    },
+    {
         "Óakenbow": {
                 "class": "HU",
                 "role": "RANGED",
                 "main": true
         }
-        },
-        "13": {
+    },
+    {
         "Dermó": {
                 "class": "HU",
                 "role": "RANGED",
@@ -146,8 +146,8 @@
                 "role": "RANGED",
                 "main": false
         }
-        },
-        "14": {
+    },
+    {
         "Junezzhunter": {
                 "class": "HU",
                 "role": "RANGED",
@@ -158,15 +158,15 @@
                 "role": "MELEE",
                 "main": false
         }
-        },
-        "15": {
+    },
+    {
         "Autlímit": {
                 "class": "DR",
                 "role": "RANGED",
                 "main": true
         }
-        },
-        "16": {
+    },
+    {
         "Knottetwo": {
                 "class": "DR",
                 "role": "RANGED",
@@ -177,8 +177,8 @@
                 "role": "RANGED",
                 "main": false
         }
-        },
-        "17": {
+    },
+    {
         "Jeadar": {
                 "class": "RO",
                 "role": "MELEE",
@@ -194,15 +194,15 @@
                 "role": "MELEE",
                 "main": false
         }
-        },
-        "18": {
+    },
+    {
         "Möksy": {
                 "class": "WA",
                 "role": "MELEE",
                 "main": true
         }
-        },
-        "19": {
+    },
+    {
         "Kiraddin": {
                 "class": "DH",
                 "role": "MELEE",
@@ -213,15 +213,15 @@
                 "role": "MELEE",
                 "main": false
         }
-        },
-        "20": {
+    },
+    {
         "Schlomey": {
                 "class": "SH",
                 "role": "MELEE",
                 "main": true
         }
-        },
-        "21": {
+    },
+    {
         "Donjuanó": {
                 "class": "MO",
                 "role": "MELEE",
@@ -232,8 +232,8 @@
                 "role": "RANGED",
                 "main": false
         }
-        },
-        "22": {
+    },
+    {
         "Rêsu": {
                 "class": "MO",
                 "role": "MELEE",
@@ -244,15 +244,15 @@
                 "role": "MELEE",
                 "main": false
         }
-        },
-        "23": {
+    },
+    {
         "Benevølent": {
                 "class": "DK",
                 "role": "MELEE",
                 "main": true
         }
-        },
-        "24": {
+    },
+    {
         "Riverice": {
                 "class": "DK",
                 "role": "MELEE",
@@ -263,5 +263,5 @@
                 "role": "MELEE",
                 "main": false
         }
-        }
-}
+    }
+]

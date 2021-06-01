@@ -91,94 +91,82 @@ impl Roster {
         let mut names = Vec::new();
 
         let parsed: Vec<Map<String, Value>> = serde_json::from_str(roster_json)?;
-
+        let mut i = 0;
+        let mut problem = LpProblem::new("setup", LpObjective::Maximize);
+        
         // handle each player
         for player in parsed {
             // constraint that ensures that a player can only play a boss on one of his characters
-            // let mut alt_constraint: Vec<LpExpression> = (0..NBOSSES).map(|_| LpExpression::from(0)).collect();
+            let mut alt_constraint: Vec<LpExpression> = (0..NBOSSES).map(|_| LpExpression::from(0)).collect();
+
 
             for (name, v) in player {
                 let c: CharJson = serde_json::from_value(v)?;
+                
                 let roles = get_roles(&c);
-                let char = Char::new(&name, roles);
+                let char = Char::new(&format!("c_{}", i), roles);
 
                 // Add boss number i to alt_constraint i for each character belonging to the player
-                // for (constr, var) in alt_constraint.iter_mut().zip(char.bosses.iter()) {
-                //     *constr += var;
-                // }
+                for (constr, var) in alt_constraint.iter_mut().zip(char.bosses.iter()) {
+                    *constr += var;
+                }
                 
                 // println!("{:?}: {:?}", name, c);
                 chars.push(char);
                 names.push(name);
+                i += 1;
             }
 
             // Add all alt constraints to the problem
-            // for constr in alt_constraint.iter() {
-            //     problem += constr.le(1);
-            // } 
+            for constr in alt_constraint.iter() {
+                problem += constr.le(1);
+            } 
             // println!("");
         }
-
-        let mut problem = LpProblem::new("setup", LpObjective::Maximize);
 
         // Define the problem to be the sum of all the vault variables
         // let mut p = LpExpression::from(0);
         // for c in chars.iter() {
-        //     c.vaults.iter().for_each(|var| p += var);
+        //     for vault in c.vaults.iter() {
+        //         p += vault;
+        //     }
         // }
-        // problem += p;
-        
-        problem += &chars[0].vaults[0];
-            // chars.iter()
-            // .map(|c| c.vaults.iter())
-            // .flatten()
-            // .fold(LpExpression::from(0), |a, b| a + b);
 
+        problem += chars.iter()
+            .map(|c| c.vaults.iter())
+            .flatten()
+            .fold(LpExpression::from(0), |a, b| a + b);
+
+            
         // add constraint for vault decision varuables
-        let constr = LpExpression::from(0) + &chars[0].bosses[1] + &chars[0].bosses[2];
-        problem += constr.equal(1);
-        // for c in chars.iter() {
-            // problem += c.bosses.iter().fold(3*&c.vaults[0], |a, b| a-b).le(0);
-            // problem += c.bosses.iter().fold(6*&c.vaults[1], |a, b| a-b).le(0);
-            // problem += c.bosses.iter().fold(9*&c.vaults[2], |a, b| a-b).le(0);
-            // c.vaults.iter().enumerate().for_each(|(i, vault)| {
-            //     problem += c.bosses.iter()
-            //         .fold((3*(i as i32 + 1))*vault, |a, b| a - b)
-            //         .le(0);
-            // });
-        // }
-        
-        
+        for c in chars.iter() {
+            problem += c.bosses.iter().fold(3*&c.vaults[0], |a, b| a-b).le(0);
+            problem += c.bosses.iter().fold(6*&c.vaults[1], |a, b| a-b).le(0);
+            problem += c.bosses.iter().fold(9*&c.vaults[2], |a, b| a-b).le(0);
+        }
 
-        // for i in 0..NBOSSES {
-        //     problem += chars.iter()
-        //         .map(|c| &c.bosses[i])
-        //         .fold(LpExpression::from(0), |a, b| a + b)
-        //         .equal(20);
-        // }
+        // 20 players per boss
+        for i in 0..NBOSSES {
+            problem += chars.iter()
+                .map(|c| &c.bosses[i])
+                .fold(LpExpression::from(0), |a, b| a + b)
+                .equal(20);
+        }
+
+        // println!("{:#?}", problem.variables());
 
         // for c in chars.iter() {
         //     println!("{:?}", c);
         // }
         // println!("len of chars: {}", chars.len());
 
-        // Specify solver
-        let solver = CbcSolver::new();
+        // dummy problem
+        // problem += &chars[0].vaults[0];
+        // let constr1 = LpExpression::from(0) + &chars[0].bosses[1] + &chars[0].bosses[2];
+        // let constr2 = LpExpression::from(0) + &chars[0].vaults[0] - &chars[0].bosses[1] -&chars[0].bosses[2];
+        // problem += constr1.equal(1);
+        // problem += constr2.le(0);
 
-        // Run optimisation and process output hashmap
-        match solver.run(&problem) {
-            Ok(solution) => {
-                // let mut keys: Vec<String> = solution.results.keys().map(|x| x.clone()).collect();
-                // keys.sort();
-                // for k in keys.iter() {
-                //     println!("{}: {}", k, solution.results.get(k).unwrap());
-                // }
-                println!("Status {:?}", solution.status);
-                println!("Max: {:?}", solution.eval());
-
-            },
-            Err(msg) => println!("Solving failed: {}", msg),
-        }
 
         let r = Roster {
             problem: problem,
@@ -196,11 +184,14 @@ impl Roster {
         // Run optimisation and process output hashmap
         match solver.run(&self.problem) {
             Ok(solution) => {
-                // let mut keys: Vec<String> = solution.results.keys().map(|x| x.clone()).collect();
-                // keys.sort();
-                // for k in keys.iter() {
-                //     println!("{}: {}", k, solution.results.get(k).unwrap());
-                // }
+                let mut keys: Vec<String> = solution.results.keys().map(|x| x.clone()).collect();
+                keys.sort();
+                for k in keys.iter() {
+                    println!("{}: {}", k, solution.results.get(k).unwrap());
+                }
+                // let related = solution.related_problem;
+                // println!("{:#?}", problem.variables());
+                // println!("{:#?}", solution.results);
                 println!("Status {:?}", solution.status);
                 println!("Max: {:?}", solution.eval());
                 // println!("{:#?}", solution.results);
@@ -286,6 +277,8 @@ pub struct Char {
 
 impl Char {
     fn new(name: &str, roles: [bool; NROLES]) -> Char {
+        println!("new char: {}", name);
+
         Char {
             name: name.to_owned(),
             bosses: [
@@ -316,11 +309,11 @@ mod test {
 
     #[test]
     fn smoke_1() {
-        let path = Path::new("roster2.json");
+        let path = Path::new("roster.json");
         let contents = read_to_string(path)
             .expect("Something went wrong reading the file");
 
-        let _r = Roster::new(&contents).unwrap();
-        // r.solve();
+        let r = Roster::new(&contents).unwrap();
+        r.solve();
     }
 }
