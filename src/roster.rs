@@ -1,5 +1,7 @@
 // code snippet to tranform the roster into json
 
+#[cfg(test)]
+#[test]
 fn print_roster_json() {
     let lines = [
         "Toriees	DK	T	Furiees	DR	T",
@@ -28,13 +30,13 @@ fn print_roster_json() {
         "Benevølent	DK	M",
         "Riverice	DK	M	Axlvg	RO	M"];
 
-    let mut i = 0;
+    // let mut i = 0;
     for l in lines.iter() {
-        println!("\"{}\": {{", i);
+        println!("{{");
 
         let mut words = l.split_ascii_whitespace().peekable();
         let mut first = true;
-        while true {
+        loop {
             match words.next() {
                 Some(w) => println!("\t\"{}\": {{", w),
                 None => break
@@ -49,7 +51,7 @@ fn print_roster_json() {
                 });
             first = false;
         }
-        i+=1;
+        // i+=1;
 
         println!("}},");
     }

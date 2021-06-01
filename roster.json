@@ -1,0 +1,267 @@
+{
+        "0": {
+        "Toriees": {
+                "class": "DK",
+                "role": "TANK",
+                "main": true
+        },
+        "Furiees": {
+                "class": "DR",
+                "role": "TANK",
+                "main": false
+        }
+        },
+        "1": {
+        "Bensmonk": {
+                "class": "MO",
+                "role": "TANK",
+                "main": true
+        },
+        "Bensdh": {
+                "class": "DH",
+                "role": "TANK",
+                "main": false
+        },
+        "Benspriest": {
+                "class": "PR",
+                "role": "RANGED",
+                "main": false
+        }
+        },
+        "2": {
+        "Câlyssa": {
+                "class": "SH",
+                "role": "HEALER",
+                "main": true
+        },
+        "Càlyssa": {
+                "class": "PR",
+                "role": "HEALER",
+                "main": false
+        },
+        "Calyssá": {
+                "class": "MO",
+                "role": "HEALER",
+                "main": false
+        }
+        },
+        "3": {
+        "Foghammar": {
+                "class": "SH",
+                "role": "HEALER",
+                "main": true
+        }
+        },
+        "4": {
+        "Twicepriest": {
+                "class": "PR",
+                "role": "HEALER",
+                "main": true
+        }
+        },
+        "5": {
+        "Druuls": {
+                "class": "PA",
+                "role": "HEALER",
+                "main": true
+        }
+        },
+        "6": {
+        "Totanká": {
+                "class": "DR",
+                "role": "HEALER",
+                "main": true
+        },
+        "Mírwenn": {
+                "class": "PA",
+                "role": "HEALER",
+                "main": false
+        }
+        },
+        "7": {
+        "Zlayèr": {
+                "class": "WL",
+                "role": "RANGED",
+                "main": true
+        },
+        "Zorkón": {
+                "class": "SH",
+                "role": "RANGED",
+                "main": false
+        }
+        },
+        "8": {
+        "Gulsvien": {
+                "class": "WL",
+                "role": "RANGED",
+                "main": true
+        }
+        },
+        "9": {
+        "Dhaiva": {
+                "class": "WL",
+                "role": "RANGED",
+                "main": true
+        }
+        },
+        "10": {
+        "Sneepsin": {
+                "class": "MA",
+                "role": "RANGED",
+                "main": true
+        }
+        },
+        "11": {
+        "Räven": {
+                "class": "MA",
+                "role": "RANGED",
+                "main": true
+        },
+        "Ravend": {
+                "class": "DR",
+                "role": "RANGED",
+                "main": false
+        }
+        },
+        "12": {
+        "Óakenbow": {
+                "class": "HU",
+                "role": "RANGED",
+                "main": true
+        }
+        },
+        "13": {
+        "Dermó": {
+                "class": "HU",
+                "role": "RANGED",
+                "main": true
+        },
+        "Nachteule": {
+                "class": "DR",
+                "role": "RANGED",
+                "main": false
+        },
+        "Nighthusky": {
+                "class": "MA",
+                "role": "RANGED",
+                "main": false
+        }
+        },
+        "14": {
+        "Junezzhunter": {
+                "class": "HU",
+                "role": "RANGED",
+                "main": true
+        },
+        "Junezz": {
+                "class": "DK",
+                "role": "MELEE",
+                "main": false
+        }
+        },
+        "15": {
+        "Autlímit": {
+                "class": "DR",
+                "role": "RANGED",
+                "main": true
+        }
+        },
+        "16": {
+        "Knottetwo": {
+                "class": "DR",
+                "role": "RANGED",
+                "main": true
+        },
+        "Knottepriest": {
+                "class": "PR",
+                "role": "RANGED",
+                "main": false
+        }
+        },
+        "17": {
+        "Jeadar": {
+                "class": "RO",
+                "role": "MELEE",
+                "main": true
+        },
+        "Jeadwar": {
+                "class": "WA",
+                "role": "MELEE",
+                "main": false
+        },
+        "Jeadsha": {
+                "class": "SH",
+                "role": "MELEE",
+                "main": false
+        }
+        },
+        "18": {
+        "Möksy": {
+                "class": "WA",
+                "role": "MELEE",
+                "main": true
+        }
+        },
+        "19": {
+        "Kiraddin": {
+                "class": "DH",
+                "role": "MELEE",
+                "main": true
+        },
+        "Kiradk": {
+                "class": "DK",
+                "role": "MELEE",
+                "main": false
+        }
+        },
+        "20": {
+        "Schlomey": {
+                "class": "SH",
+                "role": "MELEE",
+                "main": true
+        }
+        },
+        "21": {
+        "Donjuanó": {
+                "class": "MO",
+                "role": "MELEE",
+                "main": true
+        },
+        "Donwizard": {
+                "class": "MA",
+                "role": "RANGED",
+                "main": false
+        }
+        },
+        "22": {
+        "Rêsu": {
+                "class": "MO",
+                "role": "MELEE",
+                "main": true
+        },
+        "Resudh": {
+                "class": "DH",
+                "role": "MELEE",
+                "main": false
+        }
+        },
+        "23": {
+        "Benevølent": {
+                "class": "DK",
+                "role": "MELEE",
+                "main": true
+        }
+        },
+        "24": {
+        "Riverice": {
+                "class": "DK",
+                "role": "MELEE",
+                "main": true
+        },
+        "Axlvg": {
+                "class": "RO",
+                "role": "MELEE",
+                "main": false
+        }
+        }
+}

@@ -12,3 +12,5 @@ name = "rosterwizard"
 [dependencies]
 coin_cbc = "0.1.5"
 lp-modeler = "0.5.0"
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
