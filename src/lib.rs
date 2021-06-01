@@ -61,7 +61,7 @@ const NBOSSES: usize = 10;
 pub struct Roster {
     problem: LpProblem,
     chars: Vec<Char>,
-    names: Vec<String>,
+    namemap: HashMap<String, usize>,
 }   
 
 macro_rules! constraint_function {
@@ -89,7 +89,7 @@ impl Roster {
 
     pub fn new(roster_json: &str) -> Result<Roster> {
         let mut chars = Vec::new();
-        let mut names = Vec::new();
+        let mut namemap = HashMap::new();
 
         let parsed: Vec<Map<String, Value>> = serde_json::from_str(roster_json)?;
         let mut i = 0;
@@ -105,7 +105,7 @@ impl Roster {
                 let c: CharJson = serde_json::from_value(v)?;
                 
                 let roles = get_roles(&c);
-                let char = Char::new(i, roles);
+                let char = Char::new(name.clone(), i, roles);
 
                 // Add boss number i to alt_constraint i for each character belonging to the player
                 for (constr, var) in alt_constraint.iter_mut().zip(char.bosses.iter()) {
@@ -114,7 +114,7 @@ impl Roster {
                 
                 // println!("{:?}: {:?}", name, c);
                 chars.push(char);
-                names.push(name);
+                namemap.insert(name, i);
                 i += 1;
             }
 
@@ -150,7 +150,7 @@ impl Roster {
         let r = Roster {
             problem: problem,
             chars: chars,
-            names: names,
+            namemap: namemap,
         };
 
         Ok(r)
@@ -169,49 +169,47 @@ impl Roster {
                     println!("{}: {}", k, solution.results.get(k).unwrap());
                 }
                 
-                // println!("{:#?}", problem.variables());
-                // println!("{:#?}", solution.results);
-                // println!("Status {:?}", solution.status);
-                // println!("Max: {:?}", solution.eval());
+                println!("Status {:?}", solution.status);
+                println!("Max: {:?}", solution.eval());
 
-                // build result map
-                let mut result: HashMap<&str, Vec<bool>> = HashMap::new();
-                for n in self.names.iter() {
-                    result.insert(n, vec![false; 10]);
-                }
-                for (k, v) in solution.results.iter() {
-                    let mut key_words = k.split('_');
-                    match key_words.next() {
-                        Some("c") => {
-                            let name = &self.names[key_words.next().unwrap().parse::<usize>().unwrap()];
-                            let boss_idx = key_words.next().unwrap().parse::<usize>().unwrap();
-                            let vector = result.get_mut(name.as_str()).unwrap();
-                            vector[boss_idx] = *v == 1.;
-                        }
-                        _ => () // dont do stuff for vault variables
-                    }
-                }
-
-                // print the result to file
                 let path = Path::new("result.txt");
                 let display = path.display();
                 let mut file = match File::create(&path) {
                     Err(why) => panic!("couldn't create {}: {}", display, why),
                     Ok(file) => file,
                 };
-                for name in self.names.iter() {
-                    let init = format!("{}", name);
-                    let mut line = result.get(name.as_str()).unwrap().iter().fold(init, |l, b| l + format!("\u{0009}{}", b).as_str());
-                    line += "\n";
+                for (name, idx) in self.namemap.iter() {
+                    let ref c = self.chars[*idx];
+
+                    let line = (0..10).map(|i| 1.0 == *solution.results.get(&format!("c_{}_{}", c.name_idx, i)).unwrap())
+                        .fold(format!("{}", c.name), |l, b| l + format!("\u{0009}{}", b).as_str())
+                        + "\n";
+                    // for i in 0..3.fold() {
+                    //     solution.results.get("v_{}_{}")
+                    //     + format!("\u{0009}{}", b).as_str());
+                    // }
                     match file.write_all(line.as_bytes()) {
                         Err(why) => panic!("couldn't write to {}: {}", display, why),
                         Ok(_) => ()
                     }
                 }
-
             },
             Err(msg) => println!("{}", msg),
         }
+    }
+
+    pub fn lock_character_by_name(&mut self, name: &str, boss_idx: usize) -> Result<()> {
+        match self.namemap.get(name) {
+            Some(idx) => {
+                self.problem += self.chars[*idx].bosses[boss_idx].equal(1);
+                Ok(())
+            },
+            None => todo!()
+        }
+    }
+
+    pub fn lock_character_by_idx(&mut self, name_idx: usize, boss_idx: usize) {
+        self.problem += self.chars[name_idx].bosses[boss_idx].equal(1);
     }
 
     fn chars<'a>(&'a self) -> impl Iterator<Item = &'a Char> {
@@ -236,6 +234,7 @@ struct CharJson {
 
 #[derive(Debug)]
 pub struct Char {
+    name: String,
     name_idx: usize,
     bosses: [LpBinary; 10],
     vaults: [LpBinary; 3],
@@ -243,10 +242,11 @@ pub struct Char {
 }
 
 impl Char {
-    fn new(idx: usize, roles: [bool; NROLES]) -> Char {
+    fn new(name: String, idx: usize, roles: [bool; NROLES]) -> Char {
         // println!("new char: {}", name);
 
         Char {
+            name: name,
             name_idx: idx,
             bosses: [
                 LpBinary::new(format!("c_{}_0", idx).as_str()),
@@ -260,9 +260,9 @@ impl Char {
                 LpBinary::new(format!("c_{}_8", idx).as_str()),
                 LpBinary::new(format!("c_{}_9", idx).as_str())],
             vaults: [
-                LpBinary::new(format!("vault_{}_1", idx).as_str()),
-                LpBinary::new(format!("vault_{}_2", idx).as_str()),
-                LpBinary::new(format!("vault_{}_3", idx).as_str())],
+                LpBinary::new(format!("v_{}_0", idx).as_str()),
+                LpBinary::new(format!("v_{}_1", idx).as_str()),
+                LpBinary::new(format!("v_{}_2", idx).as_str())],
             roles: roles
         }
     }
@@ -291,6 +291,9 @@ mod test {
         r.add_role_constraint_ge(Role::WL, &[1; 10]);
         r.add_role_constraint_ge(Role::TANK, &[2; 10]);
         r.add_role_constraint_ge(Role::HEALER, &[4, 4, 4, 3, 4, 4, 5, 4, 5, 5, 4]);
+
+        let _ = r.lock_character_by_name("Riverice", 2);
+        let _ = r.lock_character_by_name("Riverice", 5);
 
         r.solve();
     }
