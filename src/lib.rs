@@ -53,6 +53,7 @@ impl From<&str> for Role {
         }
     }
 }
+
 // How many bosses are there in the tier
 const NBOSSES: usize = 10;
 
@@ -104,7 +105,7 @@ impl Roster {
                 let c: CharJson = serde_json::from_value(v)?;
                 
                 let roles = get_roles(&c);
-                let char = Char::new(&format!("c_{}", i), roles);
+                let char = Char::new(i, roles);
 
                 // Add boss number i to alt_constraint i for each character belonging to the player
                 for (constr, var) in alt_constraint.iter_mut().zip(char.bosses.iter()) {
@@ -125,13 +126,6 @@ impl Roster {
         }
 
         // Define the problem to be the sum of all the vault variables
-        // let mut p = LpExpression::from(0);
-        // for c in chars.iter() {
-        //     for vault in c.vaults.iter() {
-        //         p += vault;
-        //     }
-        // }
-
         problem += chars.iter()
             .map(|c| c.vaults.iter())
             .flatten()
@@ -152,21 +146,6 @@ impl Roster {
                 .fold(LpExpression::from(0), |a, b| a + b)
                 .equal(20);
         }
-
-        // println!("{:#?}", problem.variables());
-
-        // for c in chars.iter() {
-        //     println!("{:?}", c);
-        // }
-        // println!("len of chars: {}", chars.len());
-
-        // dummy problem
-        // problem += &chars[0].vaults[0];
-        // let constr1 = LpExpression::from(0) + &chars[0].bosses[1] + &chars[0].bosses[2];
-        // let constr2 = LpExpression::from(0) + &chars[0].vaults[0] - &chars[0].bosses[1] -&chars[0].bosses[2];
-        // problem += constr1.equal(1);
-        // problem += constr2.le(0);
-
 
         let r = Roster {
             problem: problem,
@@ -189,58 +168,46 @@ impl Roster {
                 for k in keys.iter() {
                     println!("{}: {}", k, solution.results.get(k).unwrap());
                 }
-                // let related = solution.related_problem;
+                
                 // println!("{:#?}", problem.variables());
                 // println!("{:#?}", solution.results);
-                println!("Status {:?}", solution.status);
-                println!("Max: {:?}", solution.eval());
-                // println!("{:#?}", solution.results);
+                // println!("Status {:?}", solution.status);
+                // println!("Max: {:?}", solution.eval());
 
-                // let path = Path::new("result.txt");
-                // let display = path.display();
-                // let mut file = match File::create(&path) {
-                //     Err(why) => panic!("couldn't create {}: {}", display, why),
-                //     Ok(file) => file,
-                // };
-                // match file.write_all(format!("{:#?}", solution).as_bytes()) {
-                //             Err(why) => panic!("couldn't write to {}: {}", display, why),
-                //             Ok(_) => ()
-                //         }
+                // build result map
+                let mut result: HashMap<&str, Vec<bool>> = HashMap::new();
+                for n in self.names.iter() {
+                    result.insert(n, vec![false; 10]);
+                }
+                for (k, v) in solution.results.iter() {
+                    let mut key_words = k.split('_');
+                    match key_words.next() {
+                        Some("c") => {
+                            let name = &self.names[key_words.next().unwrap().parse::<usize>().unwrap()];
+                            let boss_idx = key_words.next().unwrap().parse::<usize>().unwrap();
+                            let vector = result.get_mut(name.as_str()).unwrap();
+                            vector[boss_idx] = *v == 1.;
+                        }
+                        _ => () // dont do stuff for vault variables
+                    }
+                }
 
-                // // build result map
-                // let mut result: HashMap<&str, Vec<bool>> = HashMap::new();
-                // for n in names.iter() {
-                //     result.insert(n, vec![false; 10]);
-                // }
-                // for (k, v) in solution.results.iter() {
-                //     let mut key_words = k.split('_');
-                //     match key_words.next() {
-                //         Some("player") => {
-                //             let name_key = names[key_words.next().unwrap().parse::<usize>().unwrap()];
-                //             let boss_idx = key_words.next().unwrap().parse::<usize>().unwrap();
-                //             let vector = result.get_mut(name_key).unwrap();
-                //             vector[boss_idx] = *v == 1.;
-                //         }
-                //         _ => () // dont do stuff for vault variables
-                //     }
-                // }
-
-                // // print the result to file
-                // let path = Path::new("result.txt");
-                // let display = path.display();
-                // let mut file = match File::create(&path) {
-                //     Err(why) => panic!("couldn't create {}: {}", display, why),
-                //     Ok(file) => file,
-                // };
-                // for name in names.iter() {
-                //     let init = format!("{}", name);
-                //     let mut line = result.get(name).unwrap().iter().fold(init, |l, b| l + format!("\u{0009}{}", b).as_str());
-                //     line += "\n";
-                //     match file.write_all(line.as_bytes()) {
-                //         Err(why) => panic!("couldn't write to {}: {}", display, why),
-                //         Ok(_) => ()
-                //     }
-                // }
+                // print the result to file
+                let path = Path::new("result.txt");
+                let display = path.display();
+                let mut file = match File::create(&path) {
+                    Err(why) => panic!("couldn't create {}: {}", display, why),
+                    Ok(file) => file,
+                };
+                for name in self.names.iter() {
+                    let init = format!("{}", name);
+                    let mut line = result.get(name.as_str()).unwrap().iter().fold(init, |l, b| l + format!("\u{0009}{}", b).as_str());
+                    line += "\n";
+                    match file.write_all(line.as_bytes()) {
+                        Err(why) => panic!("couldn't write to {}: {}", display, why),
+                        Ok(_) => ()
+                    }
+                }
 
             },
             Err(msg) => println!("{}", msg),
@@ -269,33 +236,33 @@ struct CharJson {
 
 #[derive(Debug)]
 pub struct Char {
-    name: String,
+    name_idx: usize,
     bosses: [LpBinary; 10],
     vaults: [LpBinary; 3],
     roles: [bool; NROLES],
 }
 
 impl Char {
-    fn new(name: &str, roles: [bool; NROLES]) -> Char {
-        println!("new char: {}", name);
+    fn new(idx: usize, roles: [bool; NROLES]) -> Char {
+        // println!("new char: {}", name);
 
         Char {
-            name: name.to_owned(),
+            name_idx: idx,
             bosses: [
-                LpBinary::new(format!("{}_0", name).as_str()),
-                LpBinary::new(format!("{}_1", name).as_str()),
-                LpBinary::new(format!("{}_2", name).as_str()),
-                LpBinary::new(format!("{}_3", name).as_str()),
-                LpBinary::new(format!("{}_4", name).as_str()),
-                LpBinary::new(format!("{}_5", name).as_str()),
-                LpBinary::new(format!("{}_6", name).as_str()),
-                LpBinary::new(format!("{}_7", name).as_str()),
-                LpBinary::new(format!("{}_8", name).as_str()),
-                LpBinary::new(format!("{}_9", name).as_str())],
+                LpBinary::new(format!("c_{}_0", idx).as_str()),
+                LpBinary::new(format!("c_{}_1", idx).as_str()),
+                LpBinary::new(format!("c_{}_2", idx).as_str()),
+                LpBinary::new(format!("c_{}_3", idx).as_str()),
+                LpBinary::new(format!("c_{}_4", idx).as_str()),
+                LpBinary::new(format!("c_{}_5", idx).as_str()),
+                LpBinary::new(format!("c_{}_6", idx).as_str()),
+                LpBinary::new(format!("c_{}_7", idx).as_str()),
+                LpBinary::new(format!("c_{}_8", idx).as_str()),
+                LpBinary::new(format!("c_{}_9", idx).as_str())],
             vaults: [
-                LpBinary::new(format!("{}_vault_1", name).as_str()),
-                LpBinary::new(format!("{}_vault_2", name).as_str()),
-                LpBinary::new(format!("{}_vault_3", name).as_str())],
+                LpBinary::new(format!("vault_{}_1", idx).as_str()),
+                LpBinary::new(format!("vault_{}_2", idx).as_str()),
+                LpBinary::new(format!("vault_{}_3", idx).as_str())],
             roles: roles
         }
     }
@@ -313,7 +280,18 @@ mod test {
         let contents = read_to_string(path)
             .expect("Something went wrong reading the file");
 
-        let r = Roster::new(&contents).unwrap();
+        let mut r = Roster::new(&contents).unwrap();
+
+        r.add_role_constraint_ge(Role::DH, &[1; 10]);
+        r.add_role_constraint_ge(Role::MA, &[1; 10]);
+        r.add_role_constraint_ge(Role::MO, &[1; 10]);
+        r.add_role_constraint_ge(Role::PA, &[1; 10]);
+        r.add_role_constraint_ge(Role::PR, &[1; 10]);
+        r.add_role_constraint_ge(Role::WA, &[1; 10]);
+        r.add_role_constraint_ge(Role::WL, &[1; 10]);
+        r.add_role_constraint_ge(Role::TANK, &[2; 10]);
+        r.add_role_constraint_ge(Role::HEALER, &[4, 4, 4, 3, 4, 4, 5, 4, 5, 5, 4]);
+
         r.solve();
     }
 }
